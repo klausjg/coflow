@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>HomeFlow</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
+  <link rel="apple-touch-icon" sizes="180x180" href="./icon.png?v=1">
+  <link rel="icon" type="image/png" sizes="32x32" href="./icon.png?v=1">
+  <link rel="icon" type="image/png" sizes="16x16" href="./icon.png?v=1">
+  <link rel="shortcut icon" href="./icon.png?v=1">
+  
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="HomeFlow">
+
+  <style>
+    :root { --accent: #3ddba9; --accent2: #4d9fff; --bg: #0d1117; }
+    
+    body, html { 
+      background: var(--bg); 
+      margin: 0; padding: 0; 
+      width: 100%; height: 100%; 
+      overflow: hidden; 
+      font-family: 'Pretendard', -apple-system, sans-serif;
+    }
+
+    .full-screen {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      box-sizing: border-box;
+      padding: 30px;
+    }
+
+    .icon-preview { 
+      width: 110px; height: 110px; border-radius: 24px; 
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8); 
+      margin-bottom: 25px; 
+      border: 1px solid rgba(255,255,255,0.08);
+      object-fit: cover; flex-shrink: 0; aspect-ratio: 1/1;
+    }
+
+    h2 { 
+      color: var(--accent); 
+      margin-bottom: 15px; 
+      font-size: 26px; 
+      font-weight: 800; 
+      letter-spacing: -0.5px;
+    }
+    
+    .guide-button {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: var(--bg); 
+      padding: 14px 28px; 
+      border-radius: 50px;
+      font-weight: 800; 
+      font-size: 16px; 
+      border: none; 
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(61, 219, 169, 0.3);
+      letter-spacing: -0.3px;
+    }
+
+    #guide-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85); z-index: 9999; backdrop-filter: blur(8px);
+    }
+    .instruction { position: absolute; bottom: 100px; width: 100%; text-align: center; padding: 20px; }
+    .arrow { font-size: 50px; color: var(--accent); animation: bounce 1s infinite; margin-top: 20px; }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(15px); } }
+
+    .flowing-text { 
+      color: var(--accent); 
+      font-weight: bold; 
+      font-size: 1.1em; 
+      letter-spacing: 4px; 
+      animation: pulse 1.5s infinite; 
+    }
+    @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+    
+    .fallback-msg { 
+      color: #666; 
+      font-size: 12px; 
+      margin-top: 20px; 
+      text-decoration: underline; 
+      cursor: pointer; 
+    }
+  </style>
+
+  <script>
+    const APP_URL = "https://script.google.com/macros/s/AKfycbyx4i1Vm1fxloQjVPiEemKAaR4AlIUbgrDqbRK0eF3h-lqg6zAEVtjNwXr-ye4xkKjbhg/exec";
+
+    function init() {
+      const isStandalone = window.navigator.standalone === true || 
+                           window.matchMedia('(display-mode: standalone)').matches;
+
+      document.getElementById('install-ui').style.display = 'none';
+      document.getElementById('loading-ui').style.display = 'none';
+
+      if (isStandalone) {
+        const loadingUI = document.getElementById('loading-ui');
+        loadingUI.style.display = 'flex';
+        
+        setTimeout(function() {
+          window.location.href = APP_URL;
+        }, 300);
+      } else {
+        const installUI = document.getElementById('install-ui');
+        installUI.style.display = 'flex';
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+</head>
+<body>
+
+  <div id="install-ui" class="full-screen">
+    <img src="./icon.png?v=1" class="icon-preview">
+    <h2>HomeFlow</h2>
+    <p style="color:#888; margin-bottom: 30px; line-height: 1.6;">
+      우리집 할일을 함께 관리해요<br>아래 버튼을 눌러 앱을 설치하세요.
+    </p>
+    <button class="guide-button" onclick="document.getElementById('guide-overlay').style.display='block'">앱 설치 가이드</button>
+  </div>
+
+  <div id="loading-ui" class="full-screen">
+    <img src="./icon.png?v=1" class="icon-preview" style="width:80px; height:80px; box-shadow:none; opacity:0.6;">
+    <div class="flowing-text">FLOWING...</div>
+    <div class="fallback-msg" onclick="window.location.href=APP_URL">페이지가 멈췄다면 여기를 터치하세요.</div>
+  </div>
+
+  <div id="guide-overlay" onclick="this.style.display='none'">
+    <div class="instruction">
+      <h3 style="color: #3ddba9;">앱 설치 방법</h3>
+      <p style="color:#ccc; font-size: 14px; line-height: 1.8;">
+        1. 하단 메뉴의 <strong>공유</strong> 버튼을 클릭<br>
+        2. <strong>'홈 화면에 추가'</strong>를 선택하세요.
+      </p>
+      <div class="arrow">↓</div>
+    </div>
+  </div>
+
+</body>
+</html>
