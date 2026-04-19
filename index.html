@@ -1,151 +1,442 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
   <meta charset="UTF-8">
   <title>HomeFlow</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="./manifest.json">
+
   <link rel="apple-touch-icon" sizes="180x180" href="./icon.png?v=1">
   <link rel="icon" type="image/png" sizes="32x32" href="./icon.png?v=1">
   <link rel="icon" type="image/png" sizes="16x16" href="./icon.png?v=1">
   <link rel="shortcut icon" href="./icon.png?v=1">
-  
+
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="HomeFlow">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0d1117">
+
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
-    :root { --accent: #3ddba9; --accent2: #4d9fff; --bg: #0d1117; }
-    
-    body, html { 
-      background: var(--bg); 
-      margin: 0; padding: 0; 
-      width: 100%; height: 100%; 
-      overflow: hidden; 
-      font-family: 'Pretendard', -apple-system, sans-serif;
+    :root{
+      --bg:#0d1117; --surface:#11161f; --card:#151b26; --card2:#1a2130;
+      --border:#1e2a38; --border-light:#2a3d52;
+      --accent:#3ddba9; --accent2:#4d9fff;
+      --accent-dim:rgba(61,219,169,0.12);
+      --muted:#4A5568; --sub:#7A8494; --text:#E8F0F5; --text-dim:#BFC9D6;
+      --mono:'IBM Plex Mono',monospace;
+      --sans:'Noto Sans KR','Pretendard',-apple-system,'Malgun Gothic',sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+    body, html {
+      background: var(--bg);
+      width:100%; height:100%;
+      overflow:hidden;
+      font-family: var(--sans);
+      color: var(--text);
+    }
+
+    body::before {
+      content:'';
+      position:fixed; inset:0;
+      background: radial-gradient(ellipse at center,
+                                   var(--accent-dim) 0%,
+                                   rgba(77,159,255,0.04) 40%,
+                                   transparent 70%);
+      pointer-events:none; z-index:0;
     }
 
     .full-screen {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      display: none;
+      position:absolute; top:0; left:0;
+      width:100%; height:100%;
+      display:none;
+      flex-direction:column;
+      align-items:center; justify-content:center;
+      text-align:center;
+      padding:30px; z-index:1;
+      overflow-y: auto;
+    }
+
+    .icon-preview {
+      width:110px; height:110px;
+      border-radius:24px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8),
+                  0 0 40px var(--accent-dim);
+      margin-bottom:25px;
+      border: 1px solid rgba(61,219,169,0.18);
+      object-fit:cover;
+      aspect-ratio:1/1;
+      flex-shrink:0;
+    }
+
+    @keyframes brandShimmer {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+    .brand-title {
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      line-height: 1.1;
+      margin-bottom: 6px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent), var(--accent2));
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: brandShimmer 4s linear infinite;
+    }
+
+    .brand-sub {
+      color: var(--muted);
+      font-size: 10px;
+      letter-spacing: 3px;
+      font-weight: 600;
+      margin-bottom: 26px;
+      font-family: var(--sans);
+      text-transform: uppercase;
+    }
+
+    .description {
+      color: var(--sub);
+      margin-bottom: 32px;
+      line-height: 1.75;
+      font-size: 14px;
+      font-weight: 400;
+      max-width: 320px;
+    }
+
+    .guide-button {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      color: #0d1117;
+      padding: 14px 32px;
+      border-radius: 50px;
+      font-weight: 800;
+      font-size: 14px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 10px 28px rgba(61,219,169,0.3),
+                  0 2px 8px rgba(0,0,0,0.4),
+                  inset 0 1px 0 rgba(255,255,255,0.2);
+      letter-spacing: -0.2px;
+      font-family: var(--sans);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .guide-button:active {
+      transform: translateY(1px);
+      box-shadow: 0 5px 14px rgba(61,219,169,0.25),
+                  inset 0 1px 0 rgba(255,255,255,0.2);
+    }
+    .guide-button svg {
+      width: 16px; height: 16px;
+    }
+
+    /* 기기 배지 */
+    .device-badge {
+      display: inline-block;
+      font-size: 10px;
+      color: var(--sub);
+      letter-spacing: 2px;
+      font-family: var(--mono);
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+
+    /* ─────────────────────────────────────────
+       설치 가이드 오버레이
+       ───────────────────────────────────────── */
+    #guide-overlay {
+      display:none;
+      position:fixed; inset:0;
+      background: rgba(10,15,24,0.92);
+      z-index:9999;
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      text-align: center;
-      box-sizing: border-box;
-      padding: 30px;
+      justify-content: flex-start;
+      padding: 60px 30px 120px;
+      overflow-y: auto;
     }
+    #guide-overlay.active { display: flex; }
 
-    .icon-preview { 
-      width: 110px; height: 110px; border-radius: 24px; 
-      box-shadow: 0 20px 50px rgba(0,0,0,0.8); 
-      margin-bottom: 25px; 
-      border: 1px solid rgba(255,255,255,0.08);
-      object-fit: cover; flex-shrink: 0; aspect-ratio: 1/1;
-    }
-
-    h2 { 
-      color: var(--accent); 
-      margin-bottom: 15px; 
-      font-size: 26px; 
-      font-weight: 800; 
-      letter-spacing: -0.5px;
-    }
-    
-    .guide-button {
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: var(--bg); 
-      padding: 14px 28px; 
-      border-radius: 50px;
-      font-weight: 800; 
-      font-size: 16px; 
-      border: none; 
+    .guide-close {
+      position: absolute;
+      top: 20px; right: 20px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text);
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      font-size: 20px;
       cursor: pointer;
-      box-shadow: 0 10px 20px rgba(61, 219, 169, 0.3);
-      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .15s;
+      z-index: 10;
+    }
+    .guide-close:hover { background: rgba(255,255,255,0.14); }
+
+    .guide-title {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      margin-bottom: 6px;
+      line-height: 1.1;
+    }
+    .guide-subtitle {
+      font-size: 11px;
+      color: var(--sub);
+      letter-spacing: 3px;
+      font-family: var(--mono);
+      font-weight: 500;
+      margin-bottom: 32px;
+      text-transform: uppercase;
     }
 
-    #guide-overlay {
-      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.85); z-index: 9999; backdrop-filter: blur(8px);
+    .guide-steps {
+      width: 100%;
+      max-width: 340px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
     }
-    .instruction { position: absolute; bottom: 100px; width: 100%; text-align: center; padding: 20px; }
-    .arrow { font-size: 50px; color: var(--accent); animation: bounce 1s infinite; margin-top: 20px; }
-    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(15px); } }
 
-    .flowing-text { 
-      color: var(--accent); 
-      font-weight: bold; 
-      font-size: 1.1em; 
-      letter-spacing: 4px; 
-      animation: pulse 1.5s infinite; 
+    .guide-step {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-align: left;
     }
-    @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
-    
-    .fallback-msg { 
-      color: #666; 
-      font-size: 12px; 
-      margin-top: 20px; 
-      text-decoration: underline; 
-      cursor: pointer; 
+
+    .step-num {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #0d1117;
+      font-weight: 700;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-family: var(--mono);
     }
+
+    .step-icon {
+      width: 32px; height: 32px;
+      color: var(--accent);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .step-icon svg {
+      width: 100%; height: 100%;
+      fill: currentColor;
+    }
+
+    .step-text {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.55;
+      flex: 1;
+    }
+    .step-text strong {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* 하단 화살표 - iOS용 */
+    @keyframes bounceDown {
+      0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.6; }
+      50%      { transform: translateX(-50%) translateY(10px); opacity: 1; }
+    }
+    .guide-arrow {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: var(--accent);
+      animation: bounceDown 1.2s infinite ease-in-out;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      font-size: 10px;
+      letter-spacing: 2px;
+      font-family: var(--mono);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .guide-arrow svg {
+      width: 24px; height: 24px;
+      fill: currentColor;
+    }
+
+    /* 로딩 브랜드 */
+    .loading-brand {
+      position:relative;
+      width:80px; height:80px;
+      display:flex; align-items:center; justify-content:center;
+      margin-bottom: 24px;
+    }
+    .lb-ring {
+      position:absolute; inset:0;
+      border-radius:50%;
+      border: 1.5px solid var(--accent);
+    }
+    @keyframes lbRingPulse  { 0%,100%{transform:scale(1);opacity:.25} 50%{transform:scale(1.18);opacity:.55} }
+    @keyframes lbRingPulse2 { 0%,100%{transform:scale(1);opacity:.15} 50%{transform:scale(1.32);opacity:.35} }
+    .lb-ring.r1 { animation: lbRingPulse 2.2s ease-in-out infinite; }
+    .lb-ring.r2 {
+      inset:-14px;
+      border-color: var(--accent-dim);
+      animation: lbRingPulse2 2.2s ease-in-out .4s infinite;
+    }
+    @keyframes lbShimmer {
+      0%   { background-position:-200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .lb-mark {
+      width:56px; height:56px;
+      border-radius:16px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      display:flex; align-items:center; justify-content:center;
+      position:relative; overflow:hidden;
+      box-shadow: 0 8px 32px rgba(61,219,169,.3), 0 2px 8px rgba(0,0,0,.4);
+    }
+    .lb-mark::after {
+      content:'';
+      position:absolute; inset:0;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(255,255,255,.2) 40%,
+        rgba(255,255,255,.4) 50%,
+        rgba(255,255,255,.2) 60%,
+        transparent 100%);
+      background-size:200% 100%;
+      animation: lbShimmer 2.4s ease-in-out infinite;
+    }
+    .lb-hf {
+      font-size:22px; font-weight:800;
+      color:#0d1117;
+      font-family: var(--mono);
+      letter-spacing:-.5px;
+      position:relative; z-index:1;
+    }
+
+    .loading-title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      margin-bottom: 8px;
+      line-height: 1.1;
+    }
+    .loading-label {
+      font-size: 11px;
+      color: var(--sub);
+      letter-spacing: 4px;
+      font-family: var(--mono);
+      font-weight: 500;
+      margin-top: 6px;
+    }
+
+    @keyframes dotBounce {
+      0%,80%,100% { transform: translateY(0);   opacity:.35; }
+      40%         { transform: translateY(-7px); opacity:1;   }
+    }
+    .loading-dots {
+      display:flex; gap:6px;
+      justify-content:center;
+      margin-top: 18px;
+    }
+    .loading-dots span {
+      width:5px; height:5px;
+      border-radius:50%;
+      background: var(--accent);
+      opacity: .35;
+      animation: dotBounce 1.4s ease-in-out infinite;
+    }
+    .loading-dots span:nth-child(2) { animation-delay: .18s; }
+    .loading-dots span:nth-child(3) { animation-delay: .36s; }
+
+    .fallback-msg {
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 32px;
+      text-decoration: underline;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+      font-family: var(--sans);
+      transition: color .15s;
+    }
+    .fallback-msg:hover { color: var(--sub); }
   </style>
 
   <script>
     const APP_URL = "https://script.google.com/macros/s/AKfycbyx4i1Vm1fxloQjVPiEemKAaR4AlIUbgrDqbRK0eF3h-lqg6zAEVtjNwXr-ye4xkKjbhg/exec";
+    let deferredInstallPrompt = null;
 
-    function init() {
-      const isStandalone = window.navigator.standalone === true || 
-                           window.matchMedia('(display-mode: standalone)').matches;
-
-      document.getElementById('install-ui').style.display = 'none';
-      document.getElementById('loading-ui').style.display = 'none';
-
-      if (isStandalone) {
-        const loadingUI = document.getElementById('loading-ui');
-        loadingUI.style.display = 'flex';
-        
-        setTimeout(function() {
-          window.location.href = APP_URL;
-        }, 300);
-      } else {
-        const installUI = document.getElementById('install-ui');
-        installUI.style.display = 'flex';
-      }
+    function detectDevice() {
+      const ua = navigator.userAgent;
+      const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+      const isAndroid = /Android/.test(ua);
+      return { isIOS, isAndroid };
     }
 
-    document.addEventListener("DOMContentLoaded", init);
-  </script>
-</head>
-<body>
+    function hideAllScreens() {
+      document.getElementById('install-ui').style.display = 'none';
+      document.getElementById('loading-ui').style.display = 'none';
+      document.getElementById('guide-overlay').classList.remove('active');
+    }
 
-  <div id="install-ui" class="full-screen">
-    <img src="./icon.png?v=1" class="icon-preview">
-    <h2>HomeFlow</h2>
-    <p style="color:#888; margin-bottom: 30px; line-height: 1.6;">
-      우리집 할일을 함께 관리해요<br>아래 버튼을 눌러 앱을 설치하세요.
-    </p>
-    <button class="guide-button" onclick="document.getElementById('guide-overlay').style.display='block'">앱 설치 가이드</button>
-  </div>
+    async function triggerInstall() {
+      // Android Chrome: 원탭 설치
+      if (deferredInstallPrompt) {
+        try {
+          deferredInstallPrompt.prompt();
+          const choice = await deferredInstallPrompt.userChoice;
+          deferredInstallPrompt = null;
+          updateInstallButton();
+          if (choice.outcome !== 'accepted') {
+            showGuide();
+          }
+        } catch (e) {
+          console.warn('Install prompt failed:', e);
+          showGuide();
+        }
+        return;
+      }
+      showGuide();
+    }
 
-  <div id="loading-ui" class="full-screen">
-    <img src="./icon.png?v=1" class="icon-preview" style="width:80px; height:80px; box-shadow:none; opacity:0.6;">
-    <div class="flowing-text">FLOWING...</div>
-    <div class="fallback-msg" onclick="window.location.href=APP_URL">페이지가 멈췄다면 여기를 터치하세요.</div>
-  </div>
+    function showGuide() {
+      const device = detectDevice();
+      const iosGuide = document.getElementById('guide-ios');
+      const androidGuide = document.getElementById('guide-android');
+      const arrow = document.getElementById('guide-arrow-ios');
 
-  <div id="guide-overlay" onclick="this.style.display='none'">
-    <div class="instruction">
-      <h3 style="color: #3ddba9;">앱 설치 방법</h3>
-      <p style="color:#ccc; font-size: 14px; line-height: 1.8;">
-        1. 하단 메뉴의 <strong>공유</strong> 버튼을 클릭<br>
-        2. <strong>'홈 화면에 추가'</strong>를 선택하세요.
-      </p>
-      <div class="arrow">↓</div>
-    </div>
-  </div>
-
-</body>
-</html>
+      if (device.isIOS) {
+        iosGuide.style.display = 'block';
+        androidGuide.style.display = 'none';
