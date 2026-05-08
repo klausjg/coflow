@@ -9,7 +9,7 @@ jobs:
   notify:
     uses: klausjg/flow-workflows/.github/workflows/notify-notion.yml@main
     with:
-      app_name:    "Coflow"
+      app_name:    "CoFlow"
       app_page_id: "348b783a-96a1-817d-ae60-d153b5b27009"
     secrets:
       NOTION_TOKEN:            ${{ secrets.NOTION_TOKEN }}
