@@ -1,5 +1,5 @@
 /**
- * HomeFlow - Minimal Service Worker
+ * Coflow - Minimal Service Worker
  * beforeinstallprompt 트리거용. 실제 캐싱은 하지 않음.
  */
 const SW_VERSION = 'hf-launcher-v1';

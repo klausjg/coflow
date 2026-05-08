@@ -1,6 +1,6 @@
 {
-  "name": "HomeFlow",
-  "short_name": "HomeFlow",
+  "name": "Coflow",
+  "short_name": "Coflow",
   "description": "우리집 할일을 함께 관리해요",
   "start_url": "./",
   "scope": "./",
